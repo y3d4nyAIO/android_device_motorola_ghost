@@ -8,3 +8,7 @@ $(call inherit-product, vendor/XPe/config/nfc_enhanced.mk)
 
 PRODUCT_RELEASE_NAME := MOTO X
 PRODUCT_NAME := xpe_ghost
+PRODUCT_DEVICE := ghost
+PRODUCT_BRAND := Motorola
+PRODUCT_MANUFACTURER := Motorola
+PRODUCT_MODEL := MOTO X
