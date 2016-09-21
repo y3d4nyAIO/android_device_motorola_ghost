@@ -26,16 +26,13 @@
    OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
    IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <unistd.h>
+
 #include <stdlib.h>
 
-#include <cutils/properties.h>
 #include "vendor_init.h"
 #include "property_service.h"
 #include "log.h"
 #include "util.h"
-
-#define ISMATCH(a,b)	(!strncmp(a,b,PROP_VALUE_MAX))
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
@@ -54,11 +51,11 @@ static void set_cmdline_properties()
         { "ro.boot.hwrev", "ro.hw.hwrev", "0x8300", },
         { "ro.boot.radio", "ro.hw.radio", "0x1", },
     };
-
+    
     for (i = 0; i < ARRAY_SIZE(prop_map); i++) {
         memset(prop, 0, PROP_VALUE_MAX);
-        rc = property_get(prop_map[i].src_prop, prop, NULL);
-        if (rc > 0) {
+        std::string temp_var=property_get(prop_map[i].src_prop);
+        if (temp_var=="") {
             property_set(prop_map[i].dest_prop, prop);
         } else {
             property_set(prop_map[i].dest_prop, prop_map[i].def_val);
@@ -93,24 +90,24 @@ static void cdma_properties(const char *default_sub, const char *op_numeric,
 
 void vendor_load_properties()
 {
-    char platform[PROP_VALUE_MAX];
-    char radio[PROP_VALUE_MAX];
-    char device[PROP_VALUE_MAX];
-    char carrier[PROP_VALUE_MAX];
-    char bootdevice[PROP_VALUE_MAX];
-    char devicename[PROP_VALUE_MAX];
+    std::string platform;
+    std::string radio;
+    std::string device;
+    std::string carrier;
+    std::string bootdevice;
+    std::string devicename;
     int rc;
 
-    rc = property_get("ro.board.platform", platform, NULL);
-    if (!rc || !ISMATCH(platform, ANDROID_TARGET))
+    platform  = property_get("ro.board.platform");
+    if (platform != ANDROID_TARGET)
         return;
 
     set_cmdline_properties();
 
-    property_get("ro.boot.radio", radio, NULL);
-    property_get("ro.boot.carrier", carrier, NULL);
-    property_get("ro.boot.device", bootdevice, NULL);
-    if (ISMATCH(radio, "0x1")) {
+    radio = property_get("ro.boot.radio");
+    carrier = property_get("ro.boot.carrier");
+    bootdevice = property_get("ro.boot.device");
+    if (radio == "0x1") {
         /* xt1058 */
         property_set("ro.product.device", "ghost_retail");
         property_set("ro.product.model", "Moto X");
@@ -118,7 +115,7 @@ void vendor_load_properties()
         property_set("ro.build.fingerprint", "motorola/ghost_retail/ghost:5.1/LPA23.12-15.5/4:user/release-keys");
         property_set("ro.build.product", "ghost_retail");
         gsm_properties();
-    } else if (ISMATCH(radio, "0x2")) {
+    } else if (radio == "0x2") {
         /* xt1060 */
         property_set("ro.product.device", "ghost_verizon");
         property_set("ro.product.model", "Moto X");
@@ -133,7 +130,7 @@ void vendor_load_properties()
         property_set("ro.com.google.clientidbase.am", "android-verizon");
         property_set("ro.com.google.clientidbase.yt", "android-verizon");
         cdma_properties("0", "311480", "Verizon");
-    } else if (ISMATCH(radio, "0x3")) {
+    } else if (radio == "0x3") {
         /* xt1052 */
         property_set("ro.product.device", "ghost");
         property_set("ro.product.model", "Moto X");
@@ -141,7 +138,7 @@ void vendor_load_properties()
         property_set("ro.build.fingerprint", "motorola/ghost_retde/ghost:5.1/LPA23.12-15.5/3:user/release-keys");
         property_set("ro.build.product", "ghost");
         gsm_properties();
-    } else if (ISMATCH(radio, "0x4")) {
+    } else if (radio == "0x4") {
         /* xt1056 */
         property_set("ro.product.device", "ghost_sprint");
         property_set("ro.product.model", "Moto X");
@@ -149,7 +146,7 @@ void vendor_load_properties()
         property_set("ro.build.fingerprint", "motorola/ghost_sprint/ghost:5.1/LPA23.12-39.10/11:user/release-keys");
         property_set("ro.build.product", "ghost_sprint");
         cdma_properties("1", "310120", "Sprint");
-    } else if (ISMATCH(radio, "0x5")) {
+    } else if (radio == "0x5") {
         /* xt1055 */
         property_set("ro.product.device", "ghost_usc");
         property_set("ro.product.model", "Moto X");
@@ -157,7 +154,7 @@ void vendor_load_properties()
         property_set("ro.build.fingerprint", "motorola/ghost_usc/ghost:5.1/LPA23.12-21-1/1:user/release-keys");
         property_set("ro.build.product", "ghost_usc");
         cdma_properties("0", "311580", "U.S.Cellular");
-    } else if (ISMATCH(radio, "0x6")) {
+    } else if (radio == "0x6") {
         /* xt1053 */
         property_set("ro.product.device", "ghost_retail");
         property_set("ro.product.model", "Moto X");
@@ -167,7 +164,6 @@ void vendor_load_properties()
         gsm_properties();
     }
 
-    property_get("ro.product.device", device, NULL);
-    strlcpy(devicename, device, sizeof(devicename));
-    INFO("Found device: %s radio id: %s carrier: %s Setting build properties for %s device\n", bootdevice, radio, carrier, devicename);
+    property_get("ro.product.device");
+    INFO("Found device: %s radio id: %s carrier: %s Setting build properties for %s device\n", bootdevice.c_str(), radio.c_str(), carrier.c_str(), devicename.c_str());
 }
