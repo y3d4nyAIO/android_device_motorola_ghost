@@ -14,4 +14,4 @@
 # limitations under the License.
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_ghost.mk
+    $(LOCAL_DIR)/du_ghost.mk
